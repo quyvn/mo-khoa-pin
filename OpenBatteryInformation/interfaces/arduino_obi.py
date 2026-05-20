@@ -18,7 +18,7 @@ class Interface(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        serial_label = tk.Label(self, text="Serial Port:")
+        serial_label = tk.Label(self, text="Cổng nối tiếp:")
         serial_label.pack(pady=5)
 
         ports = self.get_available_serial_ports()
@@ -26,16 +26,16 @@ class Interface(tk.Frame):
         self.conf_port = ttk.Combobox(self, values=ports, state="readonly")
         self.conf_port.pack(pady=5)
 
-        self.connect_button = tk.Button(self, text="Connect", command=self.toggle_connection)
+        self.connect_button = tk.Button(self, text="Kết nối", command=self.toggle_connection)
         self.connect_button.pack(pady=10)
         self.connect_button.config(width=20)
 
 
-        self.refresh_button = tk.Button(self, text="Refresh port list", command=self.refresh_serial_list)
+        self.refresh_button = tk.Button(self, text="Làm mới danh sách cổng", command=self.refresh_serial_list)
         self.refresh_button.pack(pady=10)
         self.refresh_button.config(width=20)
 
-        self.version_label = tk.Label(self, anchor="w", width=20, text="Version:")
+        self.version_label = tk.Label(self, anchor="w", width=20, text="Phiên Bản:")
         self.version_label.pack(pady=5)
 
     def refresh_serial_list(self):
@@ -56,26 +56,26 @@ class Interface(tk.Frame):
     def open_serial_port(self):
         selected_port = self.conf_port.get()
         if not selected_port:
-            self.obi_instance.update_debug("No serial port selected. Please select a port from the dropdown.")
+            self.obi_instance.update_debug("Chưa chọn cổng nối tiếp nào. Vui lòng chọn cổng từ menu thả xuống.")
             return
         self.serial.port = selected_port
         try:
             self.serial.open()
             self.update_version()
-            self.obi_instance.update_debug(f"Opened serial port: {selected_port}")
-            self.connect_button.config(text="Disconnect", command=self.close_serial_port)
+            self.obi_instance.update_debug(f"Cổng nối tiếp đã được mở: {selected_port}")
+            self.connect_button.config(text="Ngắt kết nối", command=self.close_serial_port)
         except serial.SerialException as e:
             self.serial.close()
-            self.obi_instance.update_debug(f"Error opening serial port {selected_port}: {e}. Check the port is not in use by another application.")
+            self.obi_instance.update_debug(f"Lỗi khi mở cổng nối tiếp {selected_port}: {e}. Kiểm tra xem cổng đó có đang được ứng dụng khác sử dụng hay không.")
         except Exception as e:
             self.serial.close()
-            self.obi_instance.update_debug(f"Unexpected error opening serial port {selected_port}: {type(e).__name__}: {e}")
+            self.obi_instance.update_debug(f"Lỗi không mong muốn khi mở cổng nối tiếp {selected_port}: {type(e).__name__}: {e}")
 
     def close_serial_port(self):
         if self.serial.is_open:
             self.serial.close()
-            self.obi_instance.update_debug("Closed serial port")
-            self.connect_button.config(text="Connect", command=self.open_serial_port)
+            self.obi_instance.update_debug("Cổng nối tiếp đóng")
+            self.connect_button.config(text="Kết nối", command=self.open_serial_port)
 
     def get_version(self):
         response = self.request(INTERFACE_VERSION_CMD, max_attempts=5)
@@ -84,11 +84,11 @@ class Interface(tk.Frame):
         return version_string
     
     def update_version(self):
-        self.version_label.config(text=f"Version: {self.get_version()}")
+        self.version_label.config(text=f"Phiên bản: {self.get_version()}")
 
     def request(self, request, max_attempts=2):
         if not self.serial.is_open:
-            raise ConnectionError("Serial port is not open. Please connect to the Arduino first.")
+            raise ConnectionError("Cổng nối tiếp chưa được mở. Vui lòng kết nối với Arduino trước.")
 
         expected_length = request[2] + 2
         for attempt in range(1, max_attempts + 1):
@@ -103,13 +103,13 @@ class Interface(tk.Frame):
                     return
 
                 if len(response) == 0:
-                    raise TimeoutError(f"No response received from Arduino (expected {expected_length} bytes). Check that a battery is connected.")
+                    raise TimeoutError(f"Không nhận được phản hồi từ Arduino (dự kiến {expected_length} bytes). Kiểm tra xem pin đã được kết nối chưa.")
 
                 if len(response) != expected_length:
-                    raise ValueError(f"Incomplete response: received {len(response)} bytes, expected {expected_length}. The battery may not be seated correctly.")
+                    raise ValueError(f"Phản hồi chưa đầy đủ: đã nhận được {len(response)} bytes, expected {expected_length}. Pin có thể chưa được lắp đúng cách.")
 
                 if all(byte == 0xff for byte in response[2:]):
-                    raise ValueError("Invalid response: all bytes are 0xFF. The battery may not be communicating correctly.")
+                    raise ValueError("Phản hồi không hợp lệ: tất cả các byte đều là 0xFF. Có thể pin không giao tiếp đúng cách.")
 
                 return response
 
