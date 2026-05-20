@@ -34,23 +34,23 @@ F0513_TESTMODE_CMD  = [0x01, 0x01, 0x00, 0xCC, 0x99]
 
 initial_data = {
     "Model": "",
-    "Charge count*": "",
-    "State": "",
-    "Status code": "",
-    "Pack Voltage": "",
-    "Cell 1 Voltage": "",
-    "Cell 2 Voltage": "",
-    "Cell 3 Voltage": "",
-    "Cell 4 Voltage": "",
-    "Cell 5 Voltage": "",
-    "Cell Voltage Difference": "",
-    "Temperature Sensor 1": "",
-    "Temperature Sensor 2": "",
+    "Số lần sạc*": "",
+    "Tình trạng": "",
+    "Mã trạng thái": "",
+    "Điện áp gói": "",
+    "Điện áp Cell 1": "",
+    "Điện áp Cell 2": "",
+    "Điện áp Cell 3": "",
+    "Điện áp Cell 4": "",
+    "Điện áp Cell 5": "",
+    "Chênh lệch điện thế giữa các cell": "",
+    "Cảm biến nhiệt độ 1": "",
+    "Cảm biến nhiệt độ 2": "",
     "ROM ID": "",
-    "Manufacturing date": "",
-    "Battery message": "",
-    "Capacity": "",
-    "Battery type": "",
+    "Ngày sản xuất": "",
+    "Thông báo về pin": "",
+    "Dung lượng": "",
+    "Loại pin": "",
 }
 
 class ModuleApplication(tk.Frame):
@@ -75,46 +75,46 @@ class ModuleApplication(tk.Frame):
         columns_frame.pack(fill='both', expand=True, padx=20, pady=10)
 
         columns_frame.grid_columnconfigure(0, weight=1)
-        column_frame = tk.LabelFrame(columns_frame, text="Read data")
+        column_frame = tk.LabelFrame(columns_frame, text="Đọc dữ liệu")
         column_frame.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
         # Store buttons in a list for easy management
         self.buttons = []
 
-        button1 = tk.Button(column_frame, text="Read battery model", command=self.on_read_static_click)
+        button1 = tk.Button(column_frame, text="Đọc thông số loại pin", command=self.on_read_static_click)
         button1.pack(pady=10)
         button1.config(width=20)
         self.buttons.append(button1)
 
-        button2 = tk.Button(column_frame, text="Read battery data", command=self.on_read_data_click, state=tk.DISABLED)
+        button2 = tk.Button(column_frame, text="Đọc dữ liệu pin", command=self.on_read_data_click, state=tk.DISABLED)
         button2.pack(pady=10)
         button2.config(width=20)
         self.buttons.append(button2)
 
         columns_frame.grid_columnconfigure(1, weight=1)
-        column_frame = tk.LabelFrame(columns_frame, text="Function test")
+        column_frame = tk.LabelFrame(columns_frame, text="Kiểm thử chức năng")
         column_frame.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
-        button3 = tk.Button(column_frame, text="LED test ON", command=self.on_all_leds_on_click, state=tk.DISABLED)
+        button3 = tk.Button(column_frame, text="Bật led kiểm tra", command=self.on_all_leds_on_click, state=tk.DISABLED)
         button3.pack(pady=10)
         button3.config(width=20)
         self.buttons.append(button3)
 
-        button4 = tk.Button(column_frame, text="LED test OFF", command=self.on_all_leds_off_click, state=tk.DISABLED)
+        button4 = tk.Button(column_frame, text="Tắt led kiểm tra", command=self.on_all_leds_off_click, state=tk.DISABLED)
         button4.pack(pady=10)
         button4.config(width=20)
         self.buttons.append(button4)
 
         columns_frame.grid_columnconfigure(2, weight=1)
-        column_frame = tk.LabelFrame(columns_frame, text="Reset battery")
+        column_frame = tk.LabelFrame(columns_frame, text="Khôi phục pin")
         column_frame.grid(row=0, column=2, sticky='nsew', padx=10, pady=10)
 
-        button5 = tk.Button(column_frame, text="Clear errors", command=self.on_reset_errors_click, state=tk.DISABLED)
+        button5 = tk.Button(column_frame, text="Xóa lỗi", command=self.on_reset_errors_click, state=tk.DISABLED)
         button5.pack(pady=10)
         button5.config(width=20)
         self.buttons.append(button5)
 
-        button6 = tk.Button(column_frame, text="Reset battery message", command=self.on_reset_message_click, state=tk.DISABLED)
+        button6 = tk.Button(column_frame, text="Đặt lại thông báo pin", command=self.on_reset_message_click, state=tk.DISABLED)
         button6.pack(pady=10)
         button6.config(width=20)
         self.buttons.append(button6)
@@ -133,8 +133,8 @@ class ModuleApplication(tk.Frame):
         
         tree_scroll_y.config(command=self.tree.yview)
 
-        self.tree.heading("#0", text="Parameter")
-        self.tree.heading("Value", text="Value")
+        self.tree.heading("#0", text="Tham số")
+        self.tree.heading("Value", text="Giá trị")
 
         self.tree.tag_configure('evenrow', background='lightgrey', foreground="black")
         self.tree.tag_configure('oddrow', background='white', foreground="black")
@@ -144,10 +144,10 @@ class ModuleApplication(tk.Frame):
         button_frame = tk.Frame(self)
         button_frame.pack(pady=1, padx=1, anchor='center')
 
-        copy_button = tk.Button(button_frame, text="Copy", command=self.copy_to_clipboard)
+        copy_button = tk.Button(button_frame, text="Chép", command=self.copy_to_clipboard)
         copy_button.pack(side="left", padx=5)
 
-        clear_button = tk.Button(button_frame, text="Clear", command=self.clear_data)
+        clear_button = tk.Button(button_frame, text="Xoá", command=self.clear_data)
         clear_button.pack(side="left", padx=5)
 
         button_frame.pack(expand=True)
@@ -178,7 +178,7 @@ class ModuleApplication(tk.Frame):
             response = self.interface.request(F0513_MODEL_CMD)
             self.interface.request(CLEAR_CMD)
             self.command_version = "F0513"
-            messagebox.showwarning("Limited", "This model only supports diagnostics")
+            messagebox.showwarning("Limited", "Mẫu này chỉ hỗ trợ chẩn đoán.")
             self.buttons[1].config(state=tk.NORMAL)
             return (f"BL{response[2]:X}{response[3]:X}")
         except Exception as e:
@@ -193,7 +193,7 @@ class ModuleApplication(tk.Frame):
         commands = [self.get_model, self.get_f0513_model]
 
         if not self.interface:
-            tk.messagebox.showerror("Error", "No interface selected. Please select and connect an interface from the sidebar.")
+            tk.messagebox.showerror("Error", "Chưa có giao diện nào được chọn. Vui lòng chọn và kết nối một giao diện từ thanh bên.")
             return
         try:
             response = self.interface.request(READ_MSG_CMD)
@@ -205,9 +205,9 @@ class ModuleApplication(tk.Frame):
             lock_nibble = response[30] & 0x0F
             error_byte = response[29]
             if lock_nibble > 0:
-                lock_status = "LOCKED"
+                lock_status = "ĐÃ KHOÁ"
             else:
-                lock_status = "UNLOCKED"
+                lock_status = "MỞ KHOÁ"
             data = {"ROM ID": rom_id,
                     "Battery message": raw_msg,
                     "Charge count*": charge_count,
@@ -220,13 +220,13 @@ class ModuleApplication(tk.Frame):
             self.insert_battery_data(data)
             self.battery_present = True
         except ConnectionError as e:
-            tk.messagebox.showerror("Connection Error", f"Could not communicate with the battery:\n\n{e}")
+            tk.messagebox.showerror("Lỗi kết nối", f"Không thể giao tiếp với pin:\n\n{e}")
             return
         except (IndexError, ValueError) as e:
-            tk.messagebox.showerror("Data Error", f"Received an unexpected response while reading battery info:\n\n{type(e).__name__}: {e}")
+            tk.messagebox.showerror("Lỗi dữ liệu", f"Nhận được phản hồi không mong muốn khi đang đọc thông tin pin:\n\n{type(e).__name__}: {e}")
             return
         except Exception as e:
-            tk.messagebox.showerror("Error", f"Failed to read battery static data:\n\n{type(e).__name__}: {e}")
+            tk.messagebox.showerror("Error", f"Không thể đọc dữ liệu tĩnh của pin:\n\n{type(e).__name__}: {e}")
             return
 
         for command in commands:
@@ -390,7 +390,7 @@ class ModuleApplication(tk.Frame):
     def copy_to_clipboard(self):
         selected_items = self.tree.selection()
         if not selected_items:
-            messagebox.showwarning("No Selection", "No rows selected to copy!")
+            messagebox.showwarning("No Selection", "Không có hàng nào được chọn để sao chép!")
             return
 
         rows = []
@@ -401,7 +401,7 @@ class ModuleApplication(tk.Frame):
 
         self.parent.clipboard_clear()
         self.parent.clipboard_append('\n'.join(rows))
-        messagebox.showinfo("Copied", "Selected rows have been copied to the clipboard.")
+        messagebox.showinfo("Copied", "Các hàng đã chọn đã được sao chép vào clipboard.")
 
     def clear_data(self):
         self.insert_battery_data(initial_data)
